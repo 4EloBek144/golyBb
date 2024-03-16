@@ -1,16 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" type="text/css" href='templates/css/login.css'/>
-    <title>Выход</title>
-</head>
-<body>
-<form class="out_form">
-  <p>Вы действительно хотите выйти?</p>
-  <a href="/register" class="btn btn-danger">Да</a>
-  <a href="/" class="btn btn-success">Нет</a>
-</form>
-</body>
-</html>
+{% extends "index1.html" %}
+
+{% block content %}
+    <h1>Регистрация</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="alert alert-danger" role="alert">
+            Вы действительно хотите <strong>выйти?</strong>
+        </div>
+        <a>{{ form.submitYes(type="submit", class="btn btn-success") }}</a>
+        <a>{{ form.submitNo(type="submit", class="btn btn-outline-primary") }}</a>
+    </form>
+{% endblock %}
+
