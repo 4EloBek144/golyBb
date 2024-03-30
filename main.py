@@ -6,6 +6,10 @@ from wtforms import BooleanField, SubmitField
 from wtforms.validators import DataRequired
 from data import db_session
 from data.users import User
+from data.news import News
+from data import news_api
+from data.form_index import IndexTForm
+from data.seach_form import SeachForm
 from data.logout_form import LogoutForm
 from data.login_form import LoginForm
 from data.register_form import RegisterForm
@@ -15,6 +19,8 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 db_session.global_init("db/main.db")
+number_list = 1
+max_number_list = [1, 2, 3, 4, 5, 6, 7]
 
 
 @login_manager.user_loader
@@ -45,14 +51,11 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        a = db_sess.query(User).filter(User.name == form.login.data).first()
-        b = db_sess.query(User).filter(User.email == form.email.data).first()
-        print(a)
-        if a:
+        if db_sess.query(User).filter(User.name == form.login.data).first():
             return render_template('register.html',
                                    message="Данный логин уже занят.",
                                    form=form)
-        elif b:
+        elif db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html',
                                    message="Данная почта уже занята.",
                                    form=form)
@@ -60,7 +63,7 @@ def register():
             if i in '#@$%^&*?:;№/\\|,.`~(){}[]':
                 return render_template('register.html',
                                        message="""Пароль не должен содержать
-                                ( # @ $ % ^ & * ? : ; № / \\ | , . ` ~ ( ) [ ] { })""",
+                                ( # @ $ % ^ & * ? : ; № / \\ | , . ` ~ ( ) [ ] { } )""",
                                        form=form)
         else:
             if form.password1.data != form.password2.data:
@@ -80,14 +83,33 @@ def register():
 
     return render_template('register.html', title='Регистрация', form=form)
 
+
 @app.route('/main', methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
 def main():
-    return render_template('main.html')
+    formindex = IndexTForm()
+    return render_template('main.html', formindex=formindex)
 
+
+@app.route('/profiel', methods=['GET', 'POST'])
+def profiel():
+    db_sess = db_session.create_session()
+    news = db_sess.query(News).first()
+    return render_template('profiel.html', news=news)
 
 @app.route('/seach', methods=['GET', 'POST'])
 def seach():
+    form = SeachForm()
+    db_sess = db_session.create_session()
+    news = db_sess.query(News).all()
+    theposts = None
+    max_number_list = [1, 2, 3, 4, 5, 6, 7]
+    return render_template('seach.html', news=news, form=form, theposts=theposts, num_l=max_number_list,
+                           m_num_l=number_list)
+
+
+@app.route('/postslist', methods=['GET', 'POST'])
+def seacht():
     return render_template('seach.html')
 
 

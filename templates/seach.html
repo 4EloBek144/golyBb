@@ -1,5 +1,49 @@
 {% extends "index1.html" %}
 
 {% block content %}
-    <div class="bg-info"> Hi Ghit.......</div>
+    <br>
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
+               aria-describedby="input-group-button-right">
+        <button type="button" class="btn btn-outline-secondary" id="input-group-button-right">Искать</button>
+    </div>
+    <br>
+    {{ form.hidden_tag() }}
+    <div class="list-group">
+        {% for item in news %}
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-5 col-sm-4">
+                        <img src="assets/images/bs-images/img-3x4.png" class="img-fluid w-100"
+                             alt="card-horizontal-image">
+                    </div>
+                    <div class="col-7 col-sm-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">{{ item.text }}</p>
+                            <p class="card-text"><small class="text-muted">{{ item.tegs }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+        {% endfor %}
+    </div>
+    <br>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% for item in num_l %}
+                {% if m_num_l  == item %}
+                    <li class="page-item"><a class="page-link" href="/seach/{{ m_num_l }}">{{ item }}</a></li>
+                {% else %}
+                    <li class="page-item active" aria-current="page">
+                        <a class="page-link" href="/seach/{{ item }}">{{ item }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            <li class="page-item">
+                <a class="page-link" href="/seach/{{ m_num_l + 1 }}">Next</a>
+            </li>
+        </ul>
+    </nav>
 {% endblock %}
