@@ -1,18 +1,16 @@
 from flask import *
-from flask_wtf import *
 from flask_login import *
-from wtforms import EmailField, PasswordField
-from wtforms import BooleanField, SubmitField
-from wtforms.validators import DataRequired
 from data import db_session
 from data.users import User
 from data.news import News
-from data import news_api
 from data.form_index import IndexTForm
 from data.seach_form import SeachForm
 from data.logout_form import LogoutForm
 from data.login_form import LoginForm
 from data.register_form import RegisterForm
+from data.works_form import WorkLogin
+import werkzeug
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -29,6 +27,19 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
+def load_work(name, img, text, tags):
+    db_sess = db_session.create_session()
+    work = News(
+        name=name,
+        user_id=current_user.id,
+        img=img,
+        text=text,
+        tags=tags
+    )
+    db_sess.add(work)
+    db_sess.commit()
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -37,7 +48,7 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
+        if user and werkzeug.security.check_password_hash(user.hashed_password, str(form.password.data)):
             login_user(user, remember=True)
             return redirect("/")
         return render_template('login.html',
@@ -75,7 +86,7 @@ def register():
                 user.name = form.login.data
                 user.email = form.email.data
                 user.works = None
-                user.hashed_password = form.password1.data
+                user.hashed_password = werkzeug.security.generate_password_hash(form.password1.data)
                 db_sess.add(user)
                 db_sess.commit()
                 login_user(user, remember=True)
@@ -124,6 +135,15 @@ def logout():
         if 'submitNo' in request.form.keys():
             return redirect("/")
     return render_template('logout.html', title='Выход из аккаунта', form=form)
+
+
+@app.route('/addwork', methods=['GET', 'POST'])
+def addwork():
+    form = WorkLogin()
+    if form.validate_on_submit():
+        load_work(form.name.data, form.img.data, form.text.data, form.tags.data)
+        return redirect("/")
+    return render_template('addwork.html', title='Создание поста', form=form)
 
 
 if __name__ == '__main__':

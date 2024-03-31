@@ -12,6 +12,7 @@ class News(SqlAlchemyBase):
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     img = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     text = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    tegs = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    tags = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    time = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
 
     user = orm.relationship('User')

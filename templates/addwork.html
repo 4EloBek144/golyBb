@@ -1,0 +1,26 @@
+{% extends "index1.html" %}
+
+{% block content %}
+    <h1>Создание поста</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(class="form-control") }}<br>
+        </p>
+        <p>
+            {{ form.img.label }}<br>
+            {{ form.img(class="form-control") }}<br>
+        </p>
+        <p>
+            {{ form.text.label }}<br>
+            {{ form.text(class="form-control") }}<br>
+        </p>
+        <p>
+            {{ form.tags.label }}<br>
+            {{ form.tags(class="form-control") }}<br>
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <div>{{ message }}</div>
+    </form>
+{% endblock %}
