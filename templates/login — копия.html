@@ -1,0 +1,39 @@
+{% extends "index1.html" %}
+
+{% block content %}
+    <h1>Авторизация</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label for="exampleInputEmail1">Ваш логин или почта</label>
+            {{ form.email.label }}<br>
+            {{ form.email(type="email", class="form-control", id="exampleInputEmail1", aria-describedby="emailHelp",
+                    placeholder="Введите ваш логин или почту") }}
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                   placeholder="Введите ваш логин или почту">
+            <small id="emailHelp" class="form-text text-muted">Мы никогда не передадим вашу электронную почту кому-либо
+                еще.</small>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Ваш пароль</label>
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control", type="password") }}<br>
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Введите ваш пароль">
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Запомни меня</label>
+        </div>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+{% endblock %}
