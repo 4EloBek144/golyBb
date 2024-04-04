@@ -2,11 +2,27 @@
 
 {% block content %}
     <br>
-    <img src="img-2x2.png" class="img-thumbnail" alt="img-thumbnail">
-    <div class="card-img-overlay">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-            content.</p>
-        <p class="card-text">Last updated 3 mins ago</p>
+    <h1>{{ user.name }}</h1>
+    <img src="../static/{{ user.avatar }}" class="img-thumbnail" alt="Аватар пользователя" width="250" height="250"><br>
+    <br><h2>Работы {{ user.name }}</h2>
+    <div class="list-group">
+        {% for item in news %}
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-5 col-sm-4">
+                        <img src="../static/{{ item.img }}" class="img-fluid w-100"
+                             alt="card-horizontal-image">
+                    </div>
+                    <div class="col-7 col-sm-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">{{ item.text }}</p>
+                            <p class="card-text"><small class="text-muted">{{ item.tags }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+        {% endfor %}
     </div>
 {% endblock %}

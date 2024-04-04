@@ -85,6 +85,7 @@ def register():
                 user = User()
                 user.name = form.login.data
                 user.email = form.email.data
+                user.avatar = form.avatar.data
                 user.works = None
                 user.hashed_password = werkzeug.security.generate_password_hash(form.password1.data)
                 db_sess.add(user)
@@ -102,11 +103,18 @@ def main():
     return render_template('main.html', formindex=formindex)
 
 
-@app.route('/profiel', methods=['GET', 'POST'])
-def profiel():
+@app.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+def profile(user_id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).first()
-    return render_template('profiel.html', news=news)
+    news = db_sess.query(News).all()
+    n1 = []
+    for i in range(len(news)):
+        if news[i].user_id == user_id:
+            n1.append(news[i])
+    user = db_sess.query(User).get(user_id)
+    if user.avatar == '':
+        user.avatar = 'vk.jpg'
+    return render_template('profiel.html', news=n1, user=user)
 
 
 @app.route('/seach', methods=['GET', 'POST'])
