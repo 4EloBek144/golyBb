@@ -13,6 +13,7 @@ class News(SqlAlchemyBase):
     img = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     text = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     tags = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    anonimus = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
     time = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now())
 
     user = orm.relationship('User')

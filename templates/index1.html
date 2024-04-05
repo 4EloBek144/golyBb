@@ -26,13 +26,14 @@
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 </button>
             </nav>
-            <a class="navbar-brand" href="/main">Character Shorts</a>
-
+            <a href="/main">
+            <img src="../static/image/basic/CShorts.png" style="max-width: 140px" />
+            </a>
             <form class="d-flex">
-                <a class="btn btn-outline-success" href="/seach">Поиск</a>
+                <a class="btn btn-outline-success" href="/seach/1">Поиск</a>
             </form>
             {% if current_user.is_authenticated %}
-                <a class="btn btn-outline-light" href="/logout">Выйти</a>
+                <a class="btn btn-outline-light" href="/logout" >Выйти</a>
             {% else %}
                 <p>
                     <a class="btn btn-outline-light" href="/register">Зарегистрироваться</a>
@@ -42,6 +43,7 @@
         </div>
     </nav>
 </header>
+<main>
 <div class="d-flex" id="wrapper">
     <div class="bg-dark border-right" id="sidebar-wrapper">
         <div class="list-group list-group-flush">
@@ -53,7 +55,7 @@
                    href="/register">Зарегистрироваться</a>
                 <a class="list-group-item list-group-item-action bg-dark text-white" href="/login">Войти</a>
             {% endif %}
-            <a href="/seach" class="list-group-item list-group-item-action bg-dark text-white">Поиск</a>
+            <a href="/seach/1" class="list-group-item list-group-item-action bg-dark text-white">Поиск</a>
             <a href="#" class="list-group-item list-group-item-action bg-dark text-white">Поддержка</a>
         </div>
     </div>
@@ -79,5 +81,6 @@
         $("#wrapper").toggleClass("toggled");
     });
 </script>
+</main>
 </body>
 </html>

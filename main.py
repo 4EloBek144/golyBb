@@ -11,7 +11,6 @@ from data.register_form import RegisterForm
 from data.works_form import WorkLogin
 import werkzeug
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
@@ -102,21 +101,45 @@ def main():
     return render_template('main.html', formindex=formindex)
 
 
-@app.route('/profiel', methods=['GET', 'POST'])
-def profiel():
+@app.route('/profiel/<id>', methods=['GET', 'POST'])
+def profiel(id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).first()
+    news = db_sess.query(News).filter_by(id=id).first_or_404()
     return render_template('profiel.html', news=news)
 
-@app.route('/seach', methods=['GET', 'POST'])
-def seach():
+
+@app.route('/seach/<title>', methods=['GET', 'POST'])
+def seach(title):
     form = SeachForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).all()
-    theposts = None
-    max_number_list = [1, 2, 3, 4, 5, 6, 7]
-    return render_template('seach.html', news=news, form=form, theposts=theposts, num_l=max_number_list,
-                           m_num_l=number_list)
+    news = db_sess.query(News).filter_by(anonimus='False').all()
+    kash = len(news) // 5
+    if len(news) % 5 != 0:
+        kash += 1
+    newslist = []
+    if len(news) - 5 * (int(title) - 1) > 4:
+        vid = 5
+        if len(news) // 5 == int(title) and len(news) % 5 == 0:
+            next = False
+        else:
+            next = True
+    elif len(news) - 5 * (int(title) - 1) > 0:
+        vid = len(news) % 5
+        next = False
+    else:
+        vid = '404'
+        next = False
+    if vid != '404':
+        for i in range(vid):
+            print(5 * (int(title) - 1) + i)
+            newslist.append(news[5 * (int(title) - 1) + i])
+        max_number_list = [i for i in range(1, kash + 1)]
+        return render_template('seach.html', news=newslist, form=form, num_l=max_number_list,
+                               m_num_l=int(title), next=next)
+    else:
+        return render_template('seach.html', news=newslist, form=form, num_l=[1],
+                               message=f"Ошибка 404 (страницы {title} не существует по вашем критериям)",
+                               m_num_l=int(title), next=next)
 
 
 @app.route('/postslist', methods=['GET', 'POST'])
