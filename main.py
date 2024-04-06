@@ -39,6 +39,11 @@ def load_work(name, img, text, tags):
     db_sess.commit()
 
 
+@app.route('/seach', methods=['GET', 'POST'])
+def perekidsearch():
+    return redirect("/seach/1")
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -104,8 +109,9 @@ def main():
 @app.route('/profiel/<id>', methods=['GET', 'POST'])
 def profiel(id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter_by(id=id).first_or_404()
-    return render_template('profiel.html', news=news)
+    user = db_sess.query(User).filter_by(id=id).first()
+    print(news.name)
+    return render_template('profiel.html', news=user)
 
 
 @app.route('/seach/<title>', methods=['GET', 'POST'])

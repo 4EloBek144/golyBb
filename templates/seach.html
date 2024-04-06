@@ -12,6 +12,9 @@
     {{ form.hidden_tag() }}
     <div class="list-group">
         {% for item in news %}
+        <a href="#" style="
+        color: black;
+">
             <div class="card">
                 <div class="row g-0">
                     <div class="col-5 col-sm-4">
@@ -27,6 +30,7 @@
                     </div>
                 </div>
             </div>
+            </a>
             <br>
         {% endfor %}
     </div>
