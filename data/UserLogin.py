@@ -1,29 +1,18 @@
-import datetime
-import sqlalchemy
-from .db_session import SqlAlchemyBase
-from flask_login import *
+from flask_login import UserMixin
 from flask import url_for
 
 
-class User(SqlAlchemyBase, UserMixin):
-    __tablename__ = 'users'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    works = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
-    image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=True)
-    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-
+class UserLogin(UserMixin):
     def fromDB(self, user_id, db):
         self.__user = db.getUser(user_id)
         return self
 
-    def check_password(self, password):
-        return password == self.hashed_password
+    def create(self, user):
+        self.__user = user
+        return self
 
     def get_id(self):
-        return str(self.id)
+        return str(self.__user['id'])
 
     def getName(self):
         return self.__user['name'] if self.__user else "Без имени"
@@ -44,3 +33,9 @@ class User(SqlAlchemyBase, UserMixin):
             img = self.__user['avatar']
 
         return img
+
+    def verifyExt(self, filename):
+        ext = filename.rsplit('.', 1)[1]
+        if ext == "png" or ext == "PNG":
+            return True
+        return False

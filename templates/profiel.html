@@ -1,16 +1,21 @@
 {% extends "index1.html" %}
 
 {% block content %}
-    <br>
-    <h1>{{ user.name }}</h1>
-    <img src="../static/{{ user.avatar }}" class="img-thumbnail" alt="Аватар пользователя" width="250" height="250"><br>
-    <br><h2>Работы {{ user.name }}</h2>
-    <div class="list-group">
-        {% for item in news %}
+    <table border="0" class="bg-info">
+        <tr>
+            <td valign="top">
+                <div class="bg-warning"><img src="{{ url_for('useravatar') }}" width="300" height="300"></div>
+                {% if admin == True %}
+                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+                    <p><input type="file" name="file"></p>
+                    <p><input type="submit" value="Загрузить"></p>
+                </form>
+                {% endif %}
+                {% for item in news %}
             <div class="card">
                 <div class="row g-0">
                     <div class="col-5 col-sm-4">
-                        <img src="../static/{{ item.img }}" class="img-fluid w-100"
+                        <img src="../static/image/community/{{ item.img }}" class="img-fluid w-100"
                              alt="card-horizontal-image">
                     </div>
                     <div class="col-7 col-sm-8">
@@ -23,6 +28,9 @@
                 </div>
             </div>
             <br>
-        {% endfor %}
-    </div>
+            {% endfor %}
+            </td>
+        </tr>
+
+    </table>
 {% endblock %}
