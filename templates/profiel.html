@@ -1,5 +1,18 @@
 {% extends "index1.html" %}
 
 {% block content %}
+    <table border="0" class="bg-info">
+        <tr>
+            <td valign="top">
+                <div class="bg-warning"><img src="{{ url_for('useravatar') }}"></div>
+                {% if admin == True %}
+                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+                    <p><input type="file" name="file"></p>
+                    <p><input type="submit" value="Upload"></p>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
 
+    </table>
 {% endblock %}

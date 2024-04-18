@@ -1,3 +1,5 @@
+import sqlite3
+
 from flask import *
 from flask_login import *
 from data import db_session
@@ -9,8 +11,8 @@ from data.logout_form import LogoutForm
 from data.login_form import LoginForm
 from data.register_form import RegisterForm
 from data.works_form import WorkLogin
+from data.UserLogin import UserLogin
 import werkzeug
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -18,7 +20,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 db_session.global_init("db/main.db")
 number_list = 1
-max_number_list = [1, 2, 3, 4, 5, 6, 7]
+
+AVATAR_MAX_LENGHT = 1024 * 1024
 
 
 @login_manager.user_loader
@@ -86,6 +89,7 @@ def register():
                 user.name = form.login.data
                 user.email = form.email.data
                 user.works = None
+                user.image = None
                 user.hashed_password = werkzeug.security.generate_password_hash(form.password1.data)
                 db_sess.add(user)
                 db_sess.commit()
@@ -102,21 +106,93 @@ def main():
     return render_template('main.html', formindex=formindex)
 
 
-@app.route('/profiel', methods=['GET', 'POST'])
-def profiel():
-    db_sess = db_session.create_session()
-    news = db_sess.query(News).first()
-    return render_template('profiel.html', news=news)
+@app.route('/profiel/')
+def check():
+    return redirect(f'/profiel/{current_user.id}')
 
-@app.route('/seach', methods=['GET', 'POST'])
-def seach():
+
+@app.route('/profiel/<id>', methods=['GET', 'POST'])
+def profiel(id):
+    admin = False
+    if int(id) == int(current_user.id):
+        admin = True
+    db_sess = db_session.create_session()
+    user = db_sess.query(News).filter_by(id=id).first()
+    return render_template('profiel.html', user=user, admin=admin, id=id)
+
+
+@app.route('/seach/<title>', methods=['GET', 'POST'])
+def seach(title):
     form = SeachForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).all()
-    theposts = None
-    max_number_list = [1, 2, 3, 4, 5, 6, 7]
-    return render_template('seach.html', news=news, form=form, theposts=theposts, num_l=max_number_list,
-                           m_num_l=number_list)
+    news = db_sess.query(News).filter_by(anonimus='False').all()
+    kash = len(news) // 5
+    if len(news) % 5 != 0:
+        kash += 1
+    newslist = []
+    if len(news) - 5 * (int(title) - 1) > 4:
+        vid = 5
+        if len(news) // 5 == int(title) and len(news) % 5 == 0:
+            next = False
+        else:
+            next = True
+    elif len(news) - 5 * (int(title) - 1) > 0:
+        vid = len(news) % 5
+        next = False
+    else:
+        vid = '404'
+        next = False
+    if vid != '404':
+        for i in range(vid):
+            print(5 * (int(title) - 1) + i)
+            newslist.append(news[5 * (int(title) - 1) + i])
+        max_number_list = [i for i in range(1, kash + 1)]
+        return render_template('seach.html', news=newslist, form=form, num_l=max_number_list,
+                               m_num_l=int(title), next=next)
+    else:
+        return render_template('seach.html', news=newslist, form=form, num_l=[1],
+                               message=f"Ошибка 404 (страницы {title} не существует по вашем критериям)",
+                               m_num_l=int(title), next=next)
+
+
+@app.route('/upload', methods=["POST", "GET"])
+@login_required
+def upload():
+    if request.method == 'POST':
+        file = request.files['file']
+        db_sess = db_session.create_session()
+        ext = file.filename.rsplit('.', 1)[1]
+        if file and (ext == "png" or ext == "PNG"):
+            try:
+                binary = sqlite3.Binary(file.read())
+                kash = db_sess.query(User).filter(User.id == current_user.id).first()
+                kash.image = binary
+                db_sess.commit()
+            except:
+                flash('error', 'error')
+        else:
+            flash("Ошибка обновления аватара", "error")
+
+    return redirect(url_for(f'profiel', id=current_user.id))
+
+
+@app.route('/useravatar')
+def useravatar():
+    db_sess = db_session.create_session()
+    kash = db_sess.query(User).filter(User.id == current_user.id).first()
+    img = None
+    if not kash.image:
+        try:
+            with app.open_resource(
+                    app.root_path + url_for('static', filename='../static/image/basic/NonePicture.png'), "rb") as f:
+                img = f.read()
+        except FileNotFoundError as e:
+            print("Не найден аватар по умолчанию: " + str(e))
+    else:
+        img = kash.image
+    copy = make_response(img)
+    copy.headers['Content-Type'] = 'image/png'
+    return copy
 
 
 @app.route('/postslist', methods=['GET', 'POST'])
@@ -128,12 +204,15 @@ def seacht():
 @login_required
 def logout():
     form = LogoutForm()
-    if request.method == 'POST':
-        if 'submitYes' in request.form.keys():
-            logout_user()
-            return redirect("/")
-        if 'submitNo' in request.form.keys():
-            return redirect("/")
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            if 'submitYes' in request.form.keys():
+                logout_user()
+                return redirect("/")
+            if 'submitNo' in request.form.keys():
+                return redirect("/")
+    else:
+        return redirect("/")
     return render_template('logout.html', title='Выход из аккаунта', form=form)
 
 
