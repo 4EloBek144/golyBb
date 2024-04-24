@@ -22,11 +22,18 @@ db_session.global_init("db/main.db")
 number_list = 1
 
 db_sess = db_session.create_session()
-news = []
 news = db_sess.query(News).filter_by(anonimus='False').all()
 db_sess.close()
 
+UPLOAD_FOLDER = '/static/image/community'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
 AVATAR_MAX_LENGHT = 1024 * 1024
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @login_manager.user_loader
@@ -35,14 +42,17 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
-def load_work(name, img, text, tags):
+def load_work(name, img, text, tags, img_stat, img_dop1, img_dop2):
     db_sess = db_session.create_session()
     work = News(
         name=name,
         user_id=current_user.id,
         img=img,
         text=text,
-        tags=tags
+        tags=tags,
+        img_stat=img_stat,
+        img_dop1=img_dop1,
+        img_dop2=img_dop2
     )
     db_sess.add(work)
     db_sess.commit()
@@ -157,7 +167,7 @@ def seach(title):
                     news = set(
                         news + [i for i in db_sess.query(News).filter(
                             News.name.like(f'%{i}%'), News.anonimus != 'True',
-                                                          News.tags.in_(tags)
+                            News.tags.in_(tags)
                         )]
                     )
         if len(news) == 0:
@@ -194,6 +204,7 @@ def seach(title):
                                message=f"Ошибка 404 (страницы {title} не существует по вашем критериям)",
                                m_num_l=int(title), next=next)
 
+
 @app.route('/upload', methods=["POST", "GET"])
 @login_required
 def upload():
@@ -222,7 +233,6 @@ def project(id):
     kash = db_sess.query(News).filter(News.id == id).first()
 
 
-
 @app.route('/useravatar/<id>', methods=['GET', 'POST'])
 def useravatar(id):
     db_sess = db_session.create_session()
@@ -241,9 +251,30 @@ def useravatar(id):
     copy.headers['Content-Type'] = 'image/png'
     return copy
 
+
+@app.route('/workavatar/<id>', methods=['GET', 'POST'])
+def workavatar(id):
+    db_sess = db_session.create_session()
+    kash = db_sess.query(News).filter(News.id == id).first()
+    img = None
+    if not kash.img:
+        try:
+            with app.open_resource(
+                    app.root_path + url_for('static', filename='../static/image/basic/NonePicture.png'), "rb") as f:
+                img = f.read()
+        except FileNotFoundError as e:
+            print("Не найден аватар по умолчанию: " + str(e))
+    else:
+        img = kash.img
+    copy = make_response(img)
+    copy.headers['Content-Type'] = 'image/png'
+    return copy
+
+
 @app.route('/postslist', methods=['GET', 'POST'])
 def seacht():
     return render_template('seach.html')
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -260,12 +291,67 @@ def logout():
         return redirect("/")
     return render_template('logout.html', title='Выход из аккаунта', form=form)
 
+
 @app.route('/addwork', methods=['GET', 'POST'])
 def addwork():
     form = WorkLogin()
-    if form.validate_on_submit():
-        load_work(form.name.data, form.img.data, form.text.data, form.tags.data)
+    if request.method == 'POST' and 'submit' in request.form.keys():
+        if 'img' not in request.files:
+            flash('Не могу прочитать файл персонажа')
+
+        if 'img_stat' not in request.files:
+            flash('Не могу прочитать файл персонажа')
+        if 'img_dop1' not in request.files:
+            flash('Не могу прочитать файл персонажа')
+        if 'img_dop2' not in request.files:
+            flash('Не могу прочитать файл персонажа')
+        img = request.files['img']
+        img_stat = request.files['img_stat']
+        img_dop1 = request.files['img_dop1']
+        img_dop2 = request.files['img_dop2']
+
+        if img.filename == '':
+            img = None
+        else:
+            img = sqlite3.Binary(img.read())
+
+        if img_stat.filename == '':
+            img_stat = None
+        else:
+            img_stat = sqlite3.Binary(img_stat.read())
+
+        if img_dop1.filename == '':
+            img_dop1 = None
+        else:
+            img_dop1 = sqlite3.Binary(img_dop1.read())
+
+        if img_dop2.filename == '':
+            img_dop2 = None
+        else:
+            img_dop2 = sqlite3.Binary(img_dop2.read())
+
+        db_sess = db_session.create_session()
+        work = News(
+            name=form.name.data,
+            user_id=current_user.id,
+            img=img,
+            text=form.text.data,
+            tags=form.tags.data,
+            img_stats=img_stat,
+            img_dop1=img_dop1,
+            img_dop2=img_dop2,
+            anonimus=False
+        )
+        db_sess.add(work)
+        db_sess.commit()
+
+        global news
+        db_sess = db_session.create_session()
+        news = db_sess.query(News).filter_by(anonimus='False').all()
+        db_sess.close()
         return redirect("/")
+
+
     return render_template('addwork.html', title='Создание поста', form=form)
 
 if __name__ == '__main__':

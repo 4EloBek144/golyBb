@@ -5,8 +5,8 @@
     <div>{{ message }}</div>
     <form action="" method="post">
         <div class="input-group">
-            {{ form.text(class="form-control", placeholder="Поиск", aria-describedby="input-group-button-right") }}
-            <a>{{ form.submit(class="btn btn-outline-secondary", id="input-group-button-right") }}</a>
+            {{ form.text(class="form-control", placeholder="Поиск") }}
+            <a>{{ form.submit(class="btn btn-outline-secondary") }}</a>
         </div>
     </form>
     <br>
@@ -17,7 +17,7 @@
                 <div class="row g-0">
                     <div class="col-5 col-sm-4">
                         <a href="project/{{ item.id }}" style="text-decoration: none; color:black;" class="card-title">
-                            <img src="../static/image/community/{{ item.img }}"
+                            <img src="{{ url_for('workavatar') }}"
                                  class="img-fluid w-100"
                                  alt="card-horizontal-image">
                         </a>

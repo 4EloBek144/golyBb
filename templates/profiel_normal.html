@@ -25,7 +25,7 @@
                                         <div class="card">
                                             <div class="col-5 col-sm-4">
                                                 <a href="project/{{ item.id }}" style="text-decoration: none; color:black;" class="card-title">
-                                                    <img src="../static/image/community/{{ item.img }}"
+                                                    <img src="{{ url_for('workavatar', id=item.id) }}"
                                                      class="img-fluid w-100"
                                                      alt="card-horizontal-image">
                                                     </a>
