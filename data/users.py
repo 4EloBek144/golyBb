@@ -10,7 +10,6 @@ class User(SqlAlchemyBase, UserMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    works = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
@@ -23,7 +22,7 @@ class User(SqlAlchemyBase, UserMixin):
         return password == self.hashed_password
 
     def get_id(self):
-        return str(self.__user['id'])
+        return str(self.id)
 
     def getName(self):
         return self.__user['name'] if self.__user else "Без имени"

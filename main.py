@@ -21,6 +21,11 @@ login_manager.init_app(app)
 db_session.global_init("db/main.db")
 number_list = 1
 
+db_sess = db_session.create_session()
+news = []
+news = db_sess.query(News).filter_by(anonimus='False').all()
+db_sess.close()
+
 AVATAR_MAX_LENGHT = 1024 * 1024
 
 
@@ -65,6 +70,12 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
+        for i in form.password1.data:
+            if i in '#@$%^&*?:;№/\\|,.`~(){}[]':
+                return render_template('register.html',
+                                       message="""Пароль не должен содержать
+                                ( # @ $ % ^ & * ? : ; № / \\ | , . ` ~ ( ) [ ] { } )""",
+                                       form=form)
         if db_sess.query(User).filter(User.name == form.login.data).first():
             return render_template('register.html',
                                    message="Данный логин уже занят.",
@@ -73,12 +84,6 @@ def register():
             return render_template('register.html',
                                    message="Данная почта уже занята.",
                                    form=form)
-        for i in form.password1.data:
-            if i in '#@$%^&*?:;№/\\|,.`~(){}[]':
-                return render_template('register.html',
-                                       message="""Пароль не должен содержать
-                                ( # @ $ % ^ & * ? : ; № / \\ | , . ` ~ ( ) [ ] { } )""",
-                                       form=form)
         else:
             if form.password1.data != form.password2.data:
                 return render_template('register.html',
@@ -106,26 +111,61 @@ def main():
     return render_template('main.html', formindex=formindex)
 
 
-@app.route('/profiel/')
+@app.route('/profile/')
 def check():
-    return redirect(f'/profiel/{current_user.id}')
+    return redirect(f'/profile/{current_user.id}')
 
 
-@app.route('/profiel/<id>', methods=['GET', 'POST'])
+@app.route('/profile/<id>', methods=['GET', 'POST'])
 def profiel(id):
     admin = False
     if int(id) == int(current_user.id):
         admin = True
     db_sess = db_session.create_session()
-    user = db_sess.query(News).filter_by(id=id).first()
-    return render_template('profiel.html', user=user, admin=admin, id=id)
+    user = db_sess.query(User).filter(User.id == id).first()
+    news = db_sess.query(News).filter(News.user_id == id, News.anonimus != 'True').all()
+    n1 = []
+    for i in range(len(news)):
+        if str(news[i].user_id) == str(id):
+            n1.append(news[i])
+    return render_template('profiel_normal.html', news=n1, admin=admin, user=user)
 
 
 @app.route('/seach/<title>', methods=['GET', 'POST'])
 def seach(title):
+    global news
     form = SeachForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter_by(anonimus='False').all()
+    print(form.validate_on_submit())
+    print(request.method == 'POST', 'submit' in request.form.keys())
+    if request.method == 'POST' and 'submit' in request.form.keys():
+        print('Принял')
+        print(form.text.data)
+        if len(form.text.data) > 0 and form.text.data.count(' ') != len(form.text.data):
+            news = []
+            tags = []
+            name = []
+            for i in form.text.data.splite(" "):
+                if i[0] == '#':
+                    tags.append(i)
+                else:
+                    name.append(i)
+            print(f'Имя такаво {name}')
+            print(f'Все теги {tags}')
+            if len(name) > 0:
+                for i in name:
+                    news = set(
+                        news + [i for i in db_sess.query(News).filter(
+                            News.name.like(f'%{i}%'), News.anonimus != 'True',
+                                                          News.tags.in_(tags)
+                        )]
+                    )
+        if len(news) == 0:
+            db_sess = db_session.create_session()
+            news = []
+            news = db_sess.query(News).filter_by(anonimus='False').all()
+        flash('error', 'error')
+
     kash = len(news) // 5
     if len(news) % 5 != 0:
         kash += 1
@@ -154,32 +194,39 @@ def seach(title):
                                message=f"Ошибка 404 (страницы {title} не существует по вашем критериям)",
                                m_num_l=int(title), next=next)
 
-
 @app.route('/upload', methods=["POST", "GET"])
 @login_required
 def upload():
     if request.method == 'POST':
         file = request.files['file']
-        db_sess = db_session.create_session()
-        ext = file.filename.rsplit('.', 1)[1]
-        if file and (ext == "png" or ext == "PNG"):
-            try:
-                binary = sqlite3.Binary(file.read())
-                kash = db_sess.query(User).filter(User.id == current_user.id).first()
-                kash.image = binary
-                db_sess.commit()
-            except:
-                flash('error', 'error')
-        else:
-            flash("Ошибка обновления аватара", "error")
+        if file.filename != '':
+            db_sess = db_session.create_session()
+            ext = file.filename.rsplit('.', 1)[1]
+            if file and (ext == "png" or ext == "PNG" or ext == 'jpg'):
+                try:
+                    binary = sqlite3.Binary(file.read())
+                    kash = db_sess.query(User).filter(User.id == current_user.id).first()
+                    kash.image = binary
+                    db_sess.commit()
+                except:
+                    flash('error', 'error')
+            else:
+                flash("Ошибка обновления аватара", "error")
 
     return redirect(url_for(f'profiel', id=current_user.id))
 
 
-@app.route('/useravatar')
-def useravatar():
+@app.route('/project/<id>', methods=['GET', 'POST'])
+def project(id):
     db_sess = db_session.create_session()
-    kash = db_sess.query(User).filter(User.id == current_user.id).first()
+    kash = db_sess.query(News).filter(News.id == id).first()
+
+
+
+@app.route('/useravatar/<id>', methods=['GET', 'POST'])
+def useravatar(id):
+    db_sess = db_session.create_session()
+    kash = db_sess.query(User).filter(User.id == id).first()
     img = None
     if not kash.image:
         try:
@@ -194,11 +241,9 @@ def useravatar():
     copy.headers['Content-Type'] = 'image/png'
     return copy
 
-
 @app.route('/postslist', methods=['GET', 'POST'])
 def seacht():
     return render_template('seach.html')
-
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -215,7 +260,6 @@ def logout():
         return redirect("/")
     return render_template('logout.html', title='Выход из аккаунта', form=form)
 
-
 @app.route('/addwork', methods=['GET', 'POST'])
 def addwork():
     form = WorkLogin()
@@ -223,7 +267,6 @@ def addwork():
         load_work(form.name.data, form.img.data, form.text.data, form.tags.data)
         return redirect("/")
     return render_template('addwork.html', title='Создание поста', form=form)
-
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')

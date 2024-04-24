@@ -3,11 +3,12 @@
 {% block content %}
     <br>
     <div>{{ message }}</div>
-    <div class="input-group">
-        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
-               aria-describedby="input-group-button-right">
-        <button type="button" class="btn btn-outline-secondary" id="input-group-button-right">Искать</button>
-    </div>
+    <form action="" method="post">
+        <div class="input-group">
+            {{ form.text(class="form-control", placeholder="Поиск", aria-describedby="input-group-button-right") }}
+            <a>{{ form.submit(class="btn btn-outline-secondary", id="input-group-button-right") }}</a>
+        </div>
+    </form>
     <br>
     {{ form.hidden_tag() }}
     <div class="list-group">
@@ -15,12 +16,18 @@
             <div class="card">
                 <div class="row g-0">
                     <div class="col-5 col-sm-4">
-                        <img src="../static/image/community/{{ item.img }}" class="img-fluid w-100"
-                             alt="card-horizontal-image">
+                        <a href="project/{{ item.id }}" style="text-decoration: none; color:black;" class="card-title">
+                            <img src="../static/image/community/{{ item.img }}"
+                                 class="img-fluid w-100"
+                                 alt="card-horizontal-image">
+                        </a>
                     </div>
                     <div class="col-7 col-sm-8">
                         <div class="card-body">
-                            <h5 class="card-title">{{ item.name }}</h5>
+                            <a href="project/{{ item.id }}" style="text-decoration: none; color:black;"
+                               class="card-title">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                            </a>
                             <p class="card-text">{{ item.text }}</p>
                             <p class="card-text"><small class="text-muted">{{ item.tegs }}</small></p>
                         </div>
@@ -43,9 +50,9 @@
                 {% endif %}
             {% endfor %}
             {% if next == True %}
-            <li class="page-item">
-                <a class="page-link" href="/seach/{{ m_num_l + 1 }}">Next</a>
-            </li>
+                <li class="page-item">
+                    <a class="page-link" href="/seach/{{ m_num_l + 1 }}">Next</a>
+                </li>
             {% endif %}
         </ul>
     </nav>

@@ -4,13 +4,31 @@
     <table border="0" class="bg-info">
         <tr>
             <td valign="top">
-                <div class="bg-warning"><img src="{{ url_for('useravatar') }}"></div>
+                <div class="bg-warning"><img src="{{ url_for('useravatar') }}" width="600" height="600"></div>
                 {% if admin == True %}
                 <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
                     <p><input type="file" name="file"></p>
-                    <p><input type="submit" value="Upload"></p>
+                    <p><input type="submit" value="Загрузить"></p>
                 </form>
                 {% endif %}
+                {% for item in news %}
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-5 col-sm-4">
+                        <img src="../static/image/community/{{ item.img }}" class="img-fluid w-100"
+                             alt="card-horizontal-image">
+                    </div>
+                    <div class="col-7 col-sm-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">{{ item.text }}</p>
+                            <p class="card-text"><small class="text-muted">{{ item.tags }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
             </td>
         </tr>
 
