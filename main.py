@@ -22,7 +22,8 @@ db_session.global_init("db/main.db")
 number_list = 1
 
 db_sess = db_session.create_session()
-news = db_sess.query(News).filter_by(anonimus='False').all()
+print("%" + "%".join(["#Niggers", "#Love"]) + "%")
+news = db_sess.query(News).filter(News.anonimus != 'True').all()
 db_sess.close()
 
 UPLOAD_FOLDER = '/static/image/community'
@@ -155,7 +156,8 @@ def seach(title):
             news = []
             tags = []
             name = []
-            for i in form.text.data.splite(" "):
+            a = form.text.data
+            for i in a.split():
                 if i[0] == '#':
                     tags.append(i)
                 else:
@@ -164,16 +166,22 @@ def seach(title):
             print(f'Все теги {tags}')
             if len(name) > 0:
                 for i in name:
-                    news = set(
-                        news + [i for i in db_sess.query(News).filter(
-                            News.name.like(f'%{i}%'), News.anonimus != 'True',
-                            News.tags.in_(tags)
-                        )]
-                    )
-        if len(news) == 0:
-            db_sess = db_session.create_session()
-            news = []
-            news = db_sess.query(News).filter_by(anonimus='False').all()
+                    print(name, "%" + "%".join(tags) + "%")
+                    kash = db_sess.query(News).filter(
+                        News.name.like(f'%{i}%'),
+                        News.anonimus != 'True',
+                        News.tags.like("%" + "%".join(tags) + "%")).all()
+                for i in kash:
+                    if i not in news:
+                        news.append(i)
+
+            elif len(tags) > 0:
+
+                print("%" + "%".join(tags) + "%")
+                news = db_sess.query(News).filter(
+                    News.anonimus != 'True',
+                    News.tags.like("%" + "%".join(tags) + "%")).all()
+
         flash('error', 'error')
 
     kash = len(news) // 5
@@ -294,6 +302,7 @@ def logout():
 
 @app.route('/addwork', methods=['GET', 'POST'])
 def addwork():
+    global news
     form = WorkLogin()
     if request.method == 'POST' and 'submit' in request.form.keys():
         if 'img' not in request.files:
@@ -340,19 +349,19 @@ def addwork():
             img_stats=img_stat,
             img_dop1=img_dop1,
             img_dop2=img_dop2,
-            anonimus=False
+            anonimus='False'
         )
         db_sess.add(work)
         db_sess.commit()
 
-        global news
         db_sess = db_session.create_session()
         news = db_sess.query(News).filter_by(anonimus='False').all()
         db_sess.close()
+
         return redirect("/")
 
-
     return render_template('addwork.html', title='Создание поста', form=form)
+
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
