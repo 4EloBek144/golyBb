@@ -24,8 +24,8 @@
                                     </div>
                                     {% if user.id == current_user.id %}
                                         <div class="input-group flex-nowrap ">
-                                            <a href="../project_redact/{{ item.id }}" class="btn btn-warning">Редактировать</a>
-                                            <a href="../project_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
+                                            <a href="../project_redact/{{ post.id }}" class="btn btn-warning">Редактировать</a>
+                                            <a href="../project_delete/{{ post.id }}" class="btn btn-danger">Удалить</a>
                                             <br><br>
                                         </div>
                                     {% endif %}
