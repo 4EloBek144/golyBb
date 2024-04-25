@@ -22,7 +22,7 @@
                                              alt="url_for('useravatar', id={{ post.user_id }} )">
                                         <a href="/profile/{{ post.user_id }}" class="btn btn-primary">{{ name }}</a>
                                     </div>
-                                    {% if user.id == current_user.id %}
+                                    {% if post.user_id == current_user.id %}
                                         <div class="input-group flex-nowrap ">
                                             <a href="../project_redact/{{ post.id }}" class="btn btn-warning">Редактировать</a>
                                             <a href="../project_delete/{{ post.id }}" class="btn btn-danger">Удалить</a>
