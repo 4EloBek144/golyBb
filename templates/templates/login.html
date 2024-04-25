@@ -1,0 +1,34 @@
+{% extends "index1.html" %}
+
+{% block content %}
+    <main class="form-signin">
+        <h1>Авторизация</h1>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                <label for="exampleInputEmail1">Ваша почта</label>
+                {{ form.email(class="form-control", type="email", placeholder="Введите вашу почту") }}
+                {% for error in form.email.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}<br>
+                {{ form.password(class="form-control", type="password", placeholder="Введите ваш пароль") }}<br>
+                {% for error in form.password.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-check">
+                {{ form.remember_me(type="checkbox", class="form-check-input") }}
+                <label class="form-check-label" for="exampleCheck1">Запомни меня</label>
+            </div>
+            <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+            <div>{{ message }}</div>
+        </form>
+    </main>
+{% endblock %}
