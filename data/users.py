@@ -1,8 +1,6 @@
-import datetime
 import sqlalchemy
 from .db_session import SqlAlchemyBase
 from flask_login import *
-from flask import url_for
 
 
 class User(SqlAlchemyBase, UserMixin):

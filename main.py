@@ -152,7 +152,7 @@ def seach(title):
                     tags.append(i)
                 else:
                     name.append(i)
-            if len(name) > 0:
+            if name > 0:
                 for i in name:
                     kash = db_sess.query(News).filter(
                         News.name.like(f'%{i}%'),
@@ -162,7 +162,13 @@ def seach(title):
                     if i not in news:
                         news.append(i)
 
-            elif len(tags) > 0:
+            elif text == '' or text == ' ':
+                db_sess = db_session.create_session()
+                news = db_sess.query(News).filter(News.anonimus != 'True').all()
+                db_sess.close()
+
+
+            elif tags:
                 news = db_sess.query(News).filter(
                     News.anonimus != 'True',
                     News.tags.like("%" + "%".join(tags) + "%")).all()
