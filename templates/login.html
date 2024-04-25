@@ -23,10 +23,6 @@
                     </div>
                 {% endfor %}
             </div>
-            <div class="form-check">
-                {{ form.remember_me(type="checkbox", class="form-check-input") }}
-                <label class="form-check-label" for="exampleCheck1">Запомни меня</label>
-            </div>
             <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
             <div>{{ message }}</div>
         </form>
