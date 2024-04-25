@@ -124,7 +124,7 @@ def check():
 @app.route('/profile/<id>', methods=['GET', 'POST'])
 def profiel(id):
     admin = False
-    if int(id) == int(current_user.id):
+    if current_user.is_authenticated and int(id) == int(current_user.id):
         admin = True
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == id).first()
@@ -505,15 +505,15 @@ def project_redact(id):
 @app.route('/project_delete/<id>', methods=['GET', 'POST'])
 @login_required
 def project_delete(id):
+    global news
     form = LogoutForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).get(id)
+    news = db_sess.query(News).filter(News.anonimus != 'True').all()
     if not news:
         return jsonify({'error': 'Not found'})
     if current_user.is_authenticated:
         if request.method == 'POST':
             if 'submitYes' in request.form.keys():
-                global news
                 db_sess.delete(news)
                 db_sess.commit()
                 db_sess = db_session.create_session()
