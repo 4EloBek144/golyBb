@@ -20,21 +20,15 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 db_session.global_init("db/main.db")
-number_list = 1
 
 db_sess = db_session.create_session()
 news = db_sess.query(News).filter(News.anonimus != 'True').all()
 db_sess.close()
 
-UPLOAD_FOLDER = '/static/image/community'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
-AVATAR_MAX_LENGHT = 1024 * 1024
-
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 
 @login_manager.user_loader
@@ -145,10 +139,10 @@ def profiel(id):
 @app.route('/seach/<title>', methods=['GET', 'POST'])
 def seach(title):
     global news
-    form = SeachForm()
+    forme = SeachForm()
     db_sess = db_session.create_session()
     if request.method == 'POST' and 'submit' in request.form.keys():
-        text = form.text.data
+        text = forme.text.data
         if len(text) > 0 and text.count(' ') != len(text):
             news = []
             tags = []
@@ -158,7 +152,7 @@ def seach(title):
                     tags.append(i)
                 else:
                     name.append(i)
-            if len(name) > 0:
+            if name:
                 for i in name:
                     kash = db_sess.query(News).filter(
                         News.name.like(f'%{i}%'),
@@ -167,11 +161,21 @@ def seach(title):
                 for i in kash:
                     if i not in news:
                         news.append(i)
+            elif text == '' or text == ' ':
+                db_sess = db_session.create_session()
+                news = db_sess.query(News).filter(News.anonimus != 'True').all()
+                db_sess.close()
 
-            elif len(tags) > 0:
+
+            elif tags:
                 news = db_sess.query(News).filter(
                     News.anonimus != 'True',
                     News.tags.like("%" + "%".join(tags) + "%")).all()
+
+        else:
+            db_sess = db_session.create_session()
+            news = db_sess.query(News).filter(News.anonimus != 'True').all()
+            db_sess.close()
 
         flash('error', 'error')
 
@@ -195,10 +199,10 @@ def seach(title):
         for i in range(vid):
             newslist.append(news[5 * (int(title) - 1) + i])
         max_number_list = [i for i in range(1, kash + 1)]
-        return render_template('seach.html', news=newslist, form=form, num_l=max_number_list,
+        return render_template('seach.html', news=newslist, form=forme, num_l=max_number_list,
                                m_num_l=int(title), next=next)
     else:
-        return render_template('seach.html', news=newslist, form=form, num_l=[1],
+        return render_template('seach.html', news=newslist, form=forme, num_l=[1],
                                message=f"Ошибка 404 (страницы {title} не существует по вашем критериям)",
                                m_num_l=int(title), next=next)
 
@@ -350,6 +354,7 @@ def logout():
         if request.method == 'POST':
             if 'submitYes' in request.form.keys():
                 logout_user()
+
                 return redirect("/")
             if 'submitNo' in request.form.keys():
                 return redirect("/")
@@ -359,6 +364,7 @@ def logout():
 
 
 @app.route('/addwork', methods=['GET', 'POST'])
+@login_required
 def addwork():
     global news
     form = WorkLogin()
@@ -507,9 +513,14 @@ def project_delete(id):
     if current_user.is_authenticated:
         if request.method == 'POST':
             if 'submitYes' in request.form.keys():
+                global news
                 db_sess.delete(news)
                 db_sess.commit()
+                db_sess = db_session.create_session()
+                news = db_sess.query(News).filter(News.anonimus != 'True').all()
+                db_sess.close()
                 return redirect(f"/profile/{news.user_id}")
+
             if 'submitNo' in request.form.keys():
                 return redirect(f"/profile/{news.user_id}")
     else:
