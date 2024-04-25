@@ -1,9 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import EmailField, PasswordField
-from wtforms import BooleanField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import SubmitField
 
 
 class LogoutForm(FlaskForm):
-    submitYes = SubmitField('Выйти')
-    submitNo = SubmitField('Остатся')
+    submitYes = SubmitField('Да')
+    submitNo = SubmitField('Нет')
