@@ -4,7 +4,11 @@
     <br>
     <div>{{ message }}</div>
     <form action="" method="post">
+
+    </form>
+    <form action="" method="post">
         <div class="input-group flex-nowrap">
+            <a>{{ rest.submitR(class="btn btn-outline") }}</a>
             {{ form.text(type="text", class="form-control", placeholder="Лич #lich #lvl1 #dnd") }}
             <a>{{ form.submit(class="btn btn-outline-secondary") }}</a>
         </div>

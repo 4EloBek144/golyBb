@@ -152,7 +152,7 @@ def seach(title):
                     tags.append(i)
                 else:
                     name.append(i)
-            if name > 0:
+            if name:
                 for i in name:
                     kash = db_sess.query(News).filter(
                         News.name.like(f'%{i}%'),
@@ -161,7 +161,6 @@ def seach(title):
                 for i in kash:
                     if i not in news:
                         news.append(i)
-
             elif text == '' or text == ' ':
                 db_sess = db_session.create_session()
                 news = db_sess.query(News).filter(News.anonimus != 'True').all()
@@ -172,10 +171,11 @@ def seach(title):
                 news = db_sess.query(News).filter(
                     News.anonimus != 'True',
                     News.tags.like("%" + "%".join(tags) + "%")).all()
-            else:
-                db_sess = db_session.create_session()
-                news = db_sess.query(News).filter(News.anonimus != 'True').all()
-                db_sess.close()
+
+        else:
+            db_sess = db_session.create_session()
+            news = db_sess.query(News).filter(News.anonimus != 'True').all()
+            db_sess.close()
 
         flash('error', 'error')
 
@@ -364,6 +364,7 @@ def logout():
 
 
 @app.route('/addwork', methods=['GET', 'POST'])
+@login_required
 def addwork():
     global news
     form = WorkLogin()
@@ -504,9 +505,10 @@ def project_redact(id):
 @app.route('/project_delete/<id>', methods=['GET', 'POST'])
 @login_required
 def project_delete(id):
+    global news
     form = LogoutForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).get(id)
+    news = db_sess.query(News).filter(News.anonimus != 'True').all()
     if not news:
         return jsonify({'error': 'Not found'})
     if current_user.is_authenticated:
@@ -514,7 +516,11 @@ def project_delete(id):
             if 'submitYes' in request.form.keys():
                 db_sess.delete(news)
                 db_sess.commit()
+                db_sess = db_session.create_session()
+                news = db_sess.query(News).filter(News.anonimus != 'True').all()
+                db_sess.close()
                 return redirect(f"/profile/{news.user_id}")
+
             if 'submitNo' in request.form.keys():
                 return redirect(f"/profile/{news.user_id}")
     else:
