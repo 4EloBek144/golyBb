@@ -1,0 +1,14 @@
+{% extends "index1.html" %}
+
+{% block content %}
+    <h1>Удаление работы</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="alert alert-danger" role="alert">
+            Вы уверенны, что хотите удалить этот пост?
+        </div>
+        <a>{{ form.submitYes(type="submit", class="btn btn-success") }}</a>
+        <a>{{ form.submitNo(type="submit", class="btn btn-outline-primary") }}</a>
+    </form>
+{% endblock %}
+

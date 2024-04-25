@@ -10,7 +10,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-class WorkLogin(FlaskForm):
+class WorkRed(FlaskForm):
     name = StringField('Название', validators=[DataRequired()])
     img = FileField('Изображение персонажа', validators=[DataRequired()])
     text = TextAreaField('Текст поста', validators=[DataRequired()])
