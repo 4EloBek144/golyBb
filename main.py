@@ -508,7 +508,7 @@ def project_delete(id):
     global news
     form = LogoutForm()
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter(News.anonimus != 'True').all()
+    news = db_sess.query(News).filter(News.id == id).first()
     if not news:
         return jsonify({'error': 'Not found'})
     if current_user.is_authenticated:
@@ -519,10 +519,10 @@ def project_delete(id):
                 db_sess = db_session.create_session()
                 news = db_sess.query(News).filter(News.anonimus != 'True').all()
                 db_sess.close()
-                return redirect(f"/profile/{news.user_id}")
+                return redirect(f"/profile/{current_user.id}")
 
             if 'submitNo' in request.form.keys():
-                return redirect(f"/profile/{news.user_id}")
+                return redirect(f"/profile/{current_user.id}")
     else:
         return redirect("/")
     return render_template('project_delete.html', title='Удаление работы', form=form)
