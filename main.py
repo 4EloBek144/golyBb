@@ -129,6 +129,7 @@ def profiel(id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == id).first()
     news = db_sess.query(News).filter(News.user_id == id, News.anonimus != 'True').all()
+    db_sess.close()
     n1 = []
     for i in range(len(news)):
         if str(news[i].user_id) == str(id):
@@ -221,6 +222,7 @@ def upload():
                     kash = db_sess.query(User).filter(User.id == current_user.id).first()
                     kash.image = binary
                     db_sess.commit()
+                    db_sess.close()
                 except:
                     flash('error', 'error')
             else:
@@ -243,6 +245,7 @@ def project(id):
     if post.img_stats:
         st = True
     names = db_sess.query(User.name).filter(User.id == post.user_id).first()
+    db_sess.close()
     return render_template('project.html', post=post, st=st, d1=d1, d2=d2, name=names[0])
 
 
@@ -267,6 +270,7 @@ def useravatar(id):
         img = kash.image
     copy = make_response(img)
     copy.headers['Content-Type'] = 'image/png'
+    db_sess.close()
     return copy
 
 
@@ -286,6 +290,7 @@ def workavatar(id):
         img = kash.img
     copy = make_response(img)
     copy.headers['Content-Type'] = 'image/png'
+    db_sess.close()
     return copy
 
 
@@ -305,6 +310,7 @@ def workstats(id):
         img = kash.img_stats
     copy = make_response(img)
     copy.headers['Content-Type'] = 'image/png'
+    db_sess.close()
     return copy
 
 
@@ -324,6 +330,7 @@ def workdop1(id):
         img = kash.img_dop1
     copy = make_response(img)
     copy.headers['Content-Type'] = 'image/png'
+    db_sess.close()
     return copy
 
 
@@ -343,6 +350,7 @@ def workdop2(id):
         img = kash.img_dop2
     copy = make_response(img)
     copy.headers['Content-Type'] = 'image/png'
+    db_sess.close()
     return copy
 
 
@@ -493,6 +501,7 @@ def project_redact(id):
             )
             db_sess.add(work)
             db_sess.commit()
+            db_sess.close()
         except Exception:
             return render_template('addwork.html', title='Редактирование проекта', form=form,
                                    message='Неверный формат ввода')
@@ -547,6 +556,7 @@ def profile_red():
                 user.image = sqlite3.Binary(img.read())
 
             db_sess.commit()
+            db_sess.close()
             return redirect(f"/profile/{current_user.id}")
         except Exception:
             return render_template('profile_red.html', title='Редактирование профиля', form=form,
